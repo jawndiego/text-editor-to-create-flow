@@ -1,100 +1,66 @@
 'use client'
-
 import { Header } from '../components'
 import { useState } from 'react'
 import { useWallet } from 'connectkit'
-import { useRouter } from 'next/router'
+import EditorWrapper from '../components/Editor/TextEditor'
+import { DropZone } from '../components/DropZone'
+import CreateButton from '../components/CreateButton';
 
 type MyDragEvent = React.DragEvent<HTMLDivElement>;
 
 export default function Page() {
   const [isConnected, setIsConnected] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
-	const [uploadSuccess, setUploadSuccess] = useState(false);
-  // const router = useRouter();
+  const [showEditor, setShowEditor] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [editedFile, setEditedFile] = useState<string | null>(null);
 
-  const onDrop = async (acceptedFiles: File[]): Promise<void> => {
-		try {
-		  const data = new FormData();
-		  
-		  acceptedFiles.forEach((file, index) => {
-			data.append(`file[]`, file); 
-		  });
-	  
-		  const response = await fetch('upload', {
-			method: 'POST',
-			body: data
-		  });
-	  
-		  if (response.ok) {
-			console.log('All files uploaded successfully');
-			setUploadSuccess(true);
-			// router.push('/chatbot')
-		  } else {
-			console.log('Upload failed');
-		  }
-		} catch (error) {
-		  console.error('Error:', error);
-		}
-	  };
+
+  const onDrop = (files: File[]) => {
+    // Handle the files array here
+    // For example, you can set the first file to the uploadedFile state
+    if (files.length > 0) {
+      setUploadedFile(files[0]);
+      setShowUpload(false); // Hide the upload UI
+      setShowEditor(true);
+    }
+  };
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Handle the file upload here
     const file = event.target.files && event.target.files[0];
-    console.log(file);
+    if (file) {
+      setShowUpload(false); // Hide the upload UI
+      setShowEditor(true);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setEditedFile(e.target?.result as string)
+      };
+      reader.readAsText(file)
+    }
   };
 
   const handleClick = () => {
     setShowUpload(true);
   }
+
   return (
     <>
-      <Header onConnectionChange ={setIsConnected}/>
+      <Header onConnectionChange={setIsConnected} />
       <div className="flex justify-center items-center h-screen">
-      {isConnected && !showUpload && <button className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded justify-center" onClick={handleClick}>create</button>}
-      {showUpload && (
-      
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
-		
-        <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10"
-      onDragOver={(event: MyDragEvent) => {
-      // Prevent default behavior (Prevent file from being opened)
-      event.preventDefault();
-      }}
-      onDrop={(event: MyDragEvent) => {
-      event.preventDefault();
-      const files: File[]= [];
-      if (event.dataTransfer.items) {
-      for (let i = 0; i < event.dataTransfer.items.length; i++){
-        if (event.dataTransfer.items[i].kind === 'file') {
-          const file = event.dataTransfer.items[i].getAsFile();
-          if (file !== null) {
-            files.push(file);
-          console.log('file', file);}
+        {isConnected && !showUpload && !showEditor && 
+          <CreateButton onClick={handleClick} />
         }
-      }
-      onDrop(files);
-      }
-    }}
-      >
-              <div className="text-center">
-              <svg className="mx-auto h-12 w-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd" />
-              </svg>
-                <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                  <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500">
-                    <span>upload a file</span>
-                    <input id="file-upload" name="file-upload" type="file" accept=".txt,.md,.mp4,image/*" className="sr-only"
-                    onChange={onFileChange}
-                  ></input>
-                  </label>
-                  <p className="pl-1">or drag and drop</p>
-                </div>
-                <p className="text-xs leading-5 text-gray-600">.txt, .md, .mp4, images up to 10mb</p>
-                </div>
-      </div>
-    </main>
-  )}
-</div> 
-</>
-  )}
+        {showUpload && (
+          <main className="flex min-h-screen flex-col items-center justify-between p-24">
+            <DropZone onDrop={onDrop} onFileChange={onFileChange} />
+          </main>
+        )}
+        {showEditor && (
+          <EditorWrapper />
+        )}
+      </div> 
+    </>
+  )
+}
