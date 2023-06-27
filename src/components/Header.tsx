@@ -1,14 +1,20 @@
 import { ConnectKitButton } from 'connectkit'
 import { Caisson } from './Caisson'
-import { Deploy } from './Deploy'
+import { CustomButton } from './customButton'
+import styled from "styled-components";
+import { useState } from 'react';
 
-export function Header() {
+interface HeaderProps {
+  onConnectionChange?: (connected: boolean) => void; 
+}
+
+export const Header: React.FC<HeaderProps> = ({onConnectionChange}) => {
+
   return (
     <div className="flex justify-between items-center p-4">
       <Caisson />
       <div className="flex items-center gap-8">
-        <Deploy />
-        <ConnectKitButton />
+        <CustomButton onConnectionChange={onConnectionChange} />
       </div>
     </div>
   )
