@@ -1,45 +1,18 @@
+// Page.tsx
 'use client'
 import { Header } from '../components'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useWallet } from 'connectkit'
 import EditorWrapper from '../components/Editor/TextEditor'
 import { DropZone } from '../components/DropZone'
 import CreateButton from '../components/CreateButton';
-
-type MyDragEvent = React.DragEvent<HTMLDivElement>;
+import useFileHandler from '../hooks/useFileHandler';
 
 export default function Page() {
   const [isConnected, setIsConnected] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [editedFile, setEditedFile] = useState<string | null>(null);
-
-
-  const onDrop = (files: File[]) => {
-    // Handle the files array here
-    // For example, you can set the first file to the uploadedFile state
-    if (files.length > 0) {
-      setUploadedFile(files[0]);
-      setShowUpload(false); // Hide the upload UI
-      setShowEditor(true);
-    }
-  };
-
-  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // Handle the file upload here
-    const file = event.target.files && event.target.files[0];
-    if (file) {
-      setShowUpload(false); // Hide the upload UI
-      setShowEditor(true);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setEditedFile(e.target?.result as string)
-      };
-      reader.readAsText(file)
-    }
-  };
+  const { uploadedFile, editedFile, onDrop, onFileChange } = useFileHandler(setShowUpload, setShowEditor);
 
   const handleClick = () => {
     setShowUpload(true);
