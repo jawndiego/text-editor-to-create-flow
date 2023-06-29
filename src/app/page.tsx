@@ -3,7 +3,7 @@
 import { Header } from '../components'
 import { useState, useEffect } from 'react'
 import { useWallet } from 'connectkit'
-import EditorWrapper from '../components/Editor/TextEditor'
+import Editor from '../components/Editor/TextEditor'
 import { DropZone } from '../components/DropZone'
 import CreateButton from '../components/CreateButton';
 import useFileHandler from '../hooks/useFileHandler';
@@ -26,12 +26,12 @@ export default function Page() {
           <CreateButton onClick={handleClick} />
         }
         {showUpload && (
-          <main className="flex min-h-screen flex-col items-center justify-between p-24">
+          <main className="flex min-h- screen flex-col items-center justify-between p-24">
             <DropZone onDrop={onDrop} onFileChange={onFileChange} />
           </main>
         )}
         {showEditor && (
-          <EditorWrapper />
+          <Editor />
         )}
       </div> 
     </>
